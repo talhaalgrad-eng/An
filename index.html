@@ -1,0 +1,494 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Discord Bot Dashboard</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    header {
+      text-align: center;
+      color: white;
+      margin-bottom: 40px;
+    }
+
+    header h1 {
+      font-size: 2.5em;
+      margin-bottom: 10px;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    }
+
+    header p {
+      font-size: 1.2em;
+      opacity: 0.9;
+    }
+
+    .dashboard {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+      gap: 20px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 12px;
+      padding: 25px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      animation: fadeIn 0.5s ease-in;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .card h2 {
+      margin-bottom: 20px;
+      color: #333;
+      font-size: 1.5em;
+      border-bottom: 2px solid #667eea;
+      padding-bottom: 10px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      color: #555;
+      font-weight: 600;
+    }
+
+    .form-group input[type="text"],
+    .form-group input[type="password"],
+    .form-group textarea {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 14px;
+      transition: all 0.3s;
+      font-family: inherit;
+    }
+
+    .form-group input:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    .form-group input[type="checkbox"] {
+      margin-right: 8px;
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+    }
+
+    .checkbox-label {
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .btn {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: all 0.3s;
+      margin-right: 10px;
+      font-weight: 600;
+      margin-top: 10px;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    }
+
+    .btn:active {
+      transform: translateY(0);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+
+    .btn-secondary {
+      background: #6c757d;
+      color: white;
+    }
+
+    .btn-success {
+      background: #28a745;
+      color: white;
+    }
+
+    .command-list {
+      list-style: none;
+    }
+
+    .command-list li {
+      padding: 12px;
+      margin-bottom: 10px;
+      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+      border-radius: 6px;
+      border-left: 4px solid #667eea;
+      transition: transform 0.2s;
+    }
+
+    .command-list li:hover {
+      transform: translateX(5px);
+    }
+
+    .command-list code {
+      background: #667eea;
+      color: white;
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-weight: bold;
+      font-family: 'Courier New', monospace;
+    }
+
+    #status {
+      padding: 15px;
+      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+      border-radius: 8px;
+      border-left: 4px solid #28a745;
+    }
+
+    #status p {
+      margin: 8px 0;
+      color: #333;
+    }
+
+    #status strong {
+      color: #667eea;
+    }
+
+    .notification {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 15px 25px;
+      border-radius: 8px;
+      color: white;
+      font-weight: 600;
+      transform: translateX(400px);
+      transition: transform 0.3s;
+      z-index: 1000;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    }
+
+    .notification.show {
+      transform: translateX(0);
+    }
+
+    .notification.success {
+      background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    }
+
+    .notification.error {
+      background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+    }
+
+    .notification.info {
+      background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+    }
+
+    .info-box {
+      background: #fff3cd;
+      border: 1px solid #ffc107;
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 20px;
+      color: #856404;
+    }
+
+    .info-box strong {
+      display: block;
+      margin-bottom: 5px;
+    }
+
+    @media (max-width: 768px) {
+      .dashboard {
+        grid-template-columns: 1fr;
+      }
+
+      header h1 {
+        font-size: 2em;
+      }
+
+      .btn {
+        display: block;
+        width: 100%;
+        margin: 10px 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>🤖 Discord Bot Dashboard</h1>
+      <p>Control your bot settings with ease</p>
+    </header>
+
+    <div class="dashboard">
+      <div class="card">
+        <h2>⚙️ Bot Settings</h2>
+        
+        <div class="info-box">
+          <strong>⚠️ Note:</strong>
+          Settings are saved locally in your browser. Click Export Config to download the JSON file for your bot.
+        </div>
+
+        <div class="form-group">
+          <label for="botToken">🔑 Bot Token</label>
+          <input type="password" id="botToken" placeholder="Enter your bot token">
+        </div>
+
+        <div class="form-group">
+          <label for="prefix">💬 Command Prefix</label>
+          <input type="text" id="prefix" placeholder="!" maxlength="5" value="!">
+        </div>
+
+        <div class="form-group">
+          <label for="welcomeMessage">👋 Welcome Message</label>
+          <textarea id="welcomeMessage" rows="3" placeholder="Welcome to the server!">Welcome to the server!</textarea>
+        </div>
+
+        <div class="form-group">
+          <label class="checkbox-label">
+            <input type="checkbox" id="automod">
+            🛡️ Enable Auto-Moderation
+          </label>
+        </div>
+
+        <div class="form-group">
+          <label class="checkbox-label">
+            <input type="checkbox" id="logging" checked>
+            📝 Enable Logging
+          </label>
+        </div>
+
+        <button class="btn btn-primary" onclick="saveConfig()">💾 Save Configuration</button>
+        <button class="btn btn-secondary" onclick="loadConfig()">🔄 Load Saved Config</button>
+        <button class="btn btn-success" onclick="exportConfig()">📥 Export Config</button>
+      </div>
+
+      <div class="card">
+        <h2>📊 Bot Status</h2>
+        <div id="status">
+          <p><strong>Prefix:</strong> <span id="statusPrefix">!</span></p>
+          <p><strong>Auto-Mod:</strong> <span id="statusAutomod">❌ Disabled</span></p>
+          <p><strong>Logging:</strong> <span id="statusLogging">✅ Enabled</span></p>
+          <p><strong>Last Updated:</strong> <span id="statusTime">Never</span></p>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>📝 Available Commands</h2>
+        <ul class="command-list">
+          <li><code id="testCmd">!test</code> - Test command using wispbyte.com</li>
+          <li><code id="helpCmd">!help</code> - Show all available commands</li>
+          <li><code id="pingCmd">!ping</code> - Check bot latency</li>
+          <li><code id="infoCmd">!info</code> - Display bot information</li>
+        </ul>
+        <p style="margin-top: 15px; color: #666; font-size: 14px;">
+          💡 <strong>Tip:</strong> Commands will use your custom prefix!
+        </p>
+      </div>
+
+      <div class="card">
+        <h2>🔧 Quick Actions</h2>
+        <button class="btn btn-primary" onclick="testConnection()">🔌 Test Bot Connection</button>
+        <button class="btn btn-secondary" onclick="resetSettings()">🔄 Reset to Defaults</button>
+        <button class="btn btn-success" onclick="copyToken()">📋 Copy Bot Token</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="notification" class="notification"></div>
+
+  <script>
+    function loadConfig() {
+      var savedConfig = localStorage.getItem('botConfig');
+      
+      if (savedConfig) {
+        var config = JSON.parse(savedConfig);
+        
+        document.getElementById('botToken').value = config.botToken || '';
+        document.getElementById('prefix').value = config.prefix || '!';
+        document.getElementById('welcomeMessage').value = config.welcomeMessage || 'Welcome to the server!';
+        document.getElementById('automod').checked = config.automod || false;
+        document.getElementById('logging').checked = config.logging !== false;
+        
+        updateStatus(config);
+        updateCommandExamples(config.prefix || '!');
+        showNotification('Configuration loaded from browser storage!', 'success');
+      } else {
+        showNotification('No saved configuration found. Using defaults.', 'info');
+      }
+    }
+
+    function saveConfig() {
+      var config = {
+        botToken: document.getElementById('botToken').value,
+        prefix: document.getElementById('prefix').value || '!',
+        welcomeMessage: document.getElementById('welcomeMessage').value,
+        automod: document.getElementById('automod').checked,
+        logging: document.getElementById('logging').checked,
+        lastUpdated: new Date().toISOString()
+      };
+
+      localStorage.setItem('botConfig', JSON.stringify(config));
+      
+      updateStatus(config);
+      updateCommandExamples(config.prefix);
+      showNotification('Configuration saved successfully!', 'success');
+    }
+
+    function updateStatus(config) {
+      document.getElementById('statusPrefix').textContent = config.prefix || '!';
+      document.getElementById('statusAutomod').textContent = config.automod ? '✅ Enabled' : '❌ Disabled';
+      document.getElementById('statusLogging').textContent = config.logging ? '✅ Enabled' : '❌ Disabled';
+      document.getElementById('statusTime').textContent = new Date().toLocaleString();
+    }
+
+    function updateCommandExamples(prefix) {
+      document.getElementById('testCmd').textContent = prefix + 'test';
+      document.getElementById('helpCmd').textContent = prefix + 'help';
+      document.getElementById('pingCmd').textContent = prefix + 'ping';
+      document.getElementById('infoCmd').textContent = prefix + 'info';
+    }
+
+    function exportConfig() {
+      var savedConfig = localStorage.getItem('botConfig');
+      
+      if (!savedConfig) {
+        showNotification('No configuration to export!', 'error');
+        return;
+      }
+
+      var config = JSON.parse(savedConfig);
+      var dataStr = JSON.stringify(config, null, 2);
+      var dataBlob = new Blob([dataStr], { type: 'application/json' });
+      var url = URL.createObjectURL(dataBlob);
+      var link = document.createElement('a');
+      link.href = url;
+      link.download = 'bot-config.json';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      showNotification('Configuration exported successfully!', 'success');
+    }
+
+    function testConnection() {
+      showNotification('Testing connection...', 'info');
+      
+      setTimeout(function() {
+        var token = document.getElementById('botToken').value;
+        if (token && token.length > 50) {
+          showNotification('Bot token format looks valid!', 'success');
+        } else {
+          showNotification('Please enter a valid bot token', 'error');
+        }
+      }, 1500);
+    }
+
+    function resetSettings() {
+      if (confirm('Are you sure you want to reset all settings to defaults?')) {
+        localStorage.removeItem('botConfig');
+        
+        document.getElementById('botToken').value = '';
+        document.getElementById('prefix').value = '!';
+        document.getElementById('welcomeMessage').value = 'Welcome to the server!';
+        document.getElementById('automod').checked = false;
+        document.getElementById('logging').checked = true;
+        
+        updateStatus({
+          prefix: '!',
+          automod: false,
+          logging: true
+        });
+        updateCommandExamples('!');
+        
+        showNotification('Settings reset to defaults!', 'success');
+      }
+    }
+
+    function copyToken() {
+      var token = document.getElementById('botToken').value;
+      
+      if (!token) {
+        showNotification('No token to copy!', 'error');
+        return;
+      }
+
+      var tempInput = document.createElement('input');
+      tempInput.value = token;
+      document.body.appendChild(tempInput);
+      tempInput.select();
+      
+      try {
+        document.execCommand('copy');
+        showNotification('Bot token copied to clipboard!', 'success');
+      } catch (err) {
+        showNotification('Failed to copy token', 'error');
+      }
+      
+      document.body.removeChild(tempInput);
+    }
+
+    function showNotification(message, type) {
+      var notification = document.getElementById('notification');
+      notification.textContent = message;
+      notification.className = 'notification ' + type + ' show';
+      
+      setTimeout(function() {
+        notification.classList.remove('show');
+      }, 3000);
+    }
+
+    document.getElementById('prefix').addEventListener('input', function(e) {
+      updateCommandExamples(e.target.value || '!');
+    });
+
+    window.addEventListener('DOMContentLoaded', function() {
+      loadConfig();
+    });
+  </script>
+</body>
+</html>
